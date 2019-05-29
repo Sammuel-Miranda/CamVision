@@ -101,6 +101,7 @@ namespace Cam //Documentation: https://docs.microsoft.com/pt-br/windows/desktop/
         private void InitPen() { if (this.crossPen == null) { this.crossPen = new global::System.Drawing.Pen(global::System.Drawing.Color.Yellow, 1.0f); } }
         public event global::System.EventHandler OnStart;
         public event global::System.EventHandler OnStop;
+        public event global::System.EventHandler OnTick;
         internal bool DebugStart;
 #if !CLAHE && !HISTOGRAM
         private static global::System.Drawing.Imaging.ImageAttributes grayAttributes;
@@ -534,6 +535,7 @@ namespace Cam //Documentation: https://docs.microsoft.com/pt-br/windows/desktop/
 #endif
                 this.Invalidate();
                 global::System.Windows.Forms.Application.DoEvents();
+                if (this.OnTick != null) { this.OnTick(this, global::System.EventArgs.Empty); }
                 if (!this.bStopped) { this.worker.Start(); }
             }
             catch (global::System.Exception excep)
@@ -684,14 +686,22 @@ namespace Cam //Documentation: https://docs.microsoft.com/pt-br/windows/desktop/
 #region FORM
     internal class FormMain : global::System.Windows.Forms.Form
     {
+        private bool wasMinimized = false;
+        private global::Cam.Capture cap;
 #if CANPAUSE
         private const string infoHowToPause = "Duplo Click (Esquerdo) para Pausar, Duplo Click (Direito) para Restaurar Tamanho original";
         private const string infoHowToStart = "Duplo Click (Esquerdo) para Reiniciar, Duplo Click (Direito) para Restaurar Tamanho original";
         private global::System.Windows.Forms.Label info;
-        private void cap_Start(object sender, global::System.EventArgs e) { this.info.Text = global::Cam.FormMain.infoHowToPause; }
         private void cap_Stop(object sender, global::System.EventArgs e) { this.info.Text = global::Cam.FormMain.infoHowToStart; }
+        private void cap_Start(object sender, global::System.EventArgs e) { this.info.Text = global::Cam.FormMain.infoHowToPause; }
 #endif
-        private global::Cam.Capture cap;
+        private void cap_Tick(object sender, global::System.EventArgs e)
+        {
+            this.SuspendLayout();
+            this.Location = new global::System.Drawing.Point(0, 0);
+            this.cap.OnTick -= this.cap_Tick;
+            this.ResumeLayout(true);
+        }
 
         private void cap_DoubleClick(object sender, global::System.EventArgs e)
         {
@@ -734,6 +744,21 @@ namespace Cam //Documentation: https://docs.microsoft.com/pt-br/windows/desktop/
             try { if (!this.cap.Stop()) { this.cap.Disconnect(); } } catch { /* NOTHING */ }
         }
 
+        protected override void OnResize(global::System.EventArgs e)
+        {
+            base.OnResize(e);
+            if (this.WindowState == global::System.Windows.Forms.FormWindowState.Minimized)
+            {
+                this.wasMinimized = true;
+                this.cap.Pause();
+            }
+            else if (this.wasMinimized)
+            {
+                this.wasMinimized = false;
+                this.cap.Start();
+            }
+        }
+
         [global::System.STAThread] internal static int Main(string[] args)
         {
             global::System.Windows.Forms.Application.EnableVisualStyles();
@@ -746,8 +771,6 @@ namespace Cam //Documentation: https://docs.microsoft.com/pt-br/windows/desktop/
         public FormMain(string[] args) : base()
         {
             this.TopMost = true;
-            this.StartPosition = global::System.Windows.Forms.FormStartPosition.Manual;
-            this.Location = new global::System.Drawing.Point(0, 0);
 #if DEBUG
 #if CLIPBOARD
             this.Text = "Cam - Clipboard, Single Device";
@@ -763,6 +786,7 @@ namespace Cam //Documentation: https://docs.microsoft.com/pt-br/windows/desktop/
             this.ClientSize = new global::System.Drawing.Size(global::Cam.Capture.StandardWidth, global::Cam.Capture.StandardHeight);
             this.cap = new global::Cam.Capture() { Name = "cap", Dock = global::System.Windows.Forms.DockStyle.Fill };
             this.cap.DoubleClick += this.cap_DoubleClick;
+            //this.cap.OnTick += this.cap_Tick;
 #if CANPAUSE
             this.cap.OnStart += this.cap_Start;
             this.cap.OnStop += this.cap_Stop;
