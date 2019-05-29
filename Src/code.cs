@@ -746,6 +746,8 @@ namespace Cam //Documentation: https://docs.microsoft.com/pt-br/windows/desktop/
         public FormMain(string[] args) : base()
         {
             this.TopMost = true;
+            this.StartPosition = global::System.Windows.Forms.FormStartPosition.Manual;
+            this.Location = new global::System.Drawing.Point(0, 0);
 #if DEBUG
 #if CLIPBOARD
             this.Text = "Cam - Clipboard, Single Device";
