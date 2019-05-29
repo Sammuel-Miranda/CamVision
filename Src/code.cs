@@ -749,8 +749,7 @@ namespace Cam //Documentation: https://docs.microsoft.com/pt-br/windows/desktop/
         {
             if (((global::System.Windows.Forms.MouseEventArgs)e).Button == global::System.Windows.Forms.MouseButtons.Right)
             {
-                this.WindowState = global::System.Windows.Forms.FormWindowState.Normal;
-                this.ClientSize = new global::System.Drawing.Size(global::Cam.Capture.StandardWidth, global::Cam.Capture.StandardHeight);
+                this.TopMost = !this.TopMost;
             }
             else
             {
@@ -812,7 +811,7 @@ namespace Cam //Documentation: https://docs.microsoft.com/pt-br/windows/desktop/
 
         public FormMain(string[] args) : base()
         {
-            //this.TopMost = true;
+            this.TopMost = true;
             this.wasMinimized = false;
 #if DEBUG
 #if CLIPBOARD
