@@ -103,7 +103,6 @@ namespace Cam //Documentation: https://docs.microsoft.com/pt-br/windows/desktop/
         public event global::System.EventHandler OnStop;
         public event global::System.EventHandler OnTick;
         private global::System.Drawing.Imaging.PixelFormat setBitCount;
-        internal bool DebugStart;
 #if !CLAHE && !HISTOGRAM
         private static global::System.Drawing.Imaging.ImageAttributes grayAttributes;
 
@@ -118,86 +117,94 @@ namespace Cam //Documentation: https://docs.microsoft.com/pt-br/windows/desktop/
 #endif
         protected override void OnPaint(global::System.Windows.Forms.PaintEventArgs e)
         {
-            if (this.tempImg == null) { e.Graphics.Clear(this.BackColor); } else { e.Graphics.DrawImage(this.tempImg, 0, 0, this.Width, this.Height); }
-            this.InitPen();
-            int midX = this.Width / 2;
-            int midY = this.Height / 2;
-            int psSTlow = midX - 5;
-            int psSThig = midX + 5;
-            int psHTlow = midX - 10;
-            int psHThig = midX + 10;
-            int cnt = 0;
-            int Jump = (int)global::System.Math.Floor(((double)this.Height / (double)global::Cam.Capture.StandardHeight) * 7.00);
-            int pos = midY - Jump;
-            while (pos > 0)
+            if (this.canCapture)
             {
-                if (cnt == 5)
+                this.canCapture = false;
+                try
                 {
-                    e.Graphics.DrawLine(this.crossPen, psHTlow, pos, psHThig, pos);
+                    if (this.tempImg == null) { e.Graphics.Clear(this.BackColor); } else { e.Graphics.DrawImage(this.tempImg, 0, 0, this.Width, this.Height); }
+                    this.InitPen();
+                    int midX = this.Width / 2;
+                    int midY = this.Height / 2;
+                    int psSTlow = midX - 5;
+                    int psSThig = midX + 5;
+                    int psHTlow = midX - 10;
+                    int psHThig = midX + 10;
+                    int cnt = 0;
+                    int Jump = (int)global::System.Math.Floor(((double)this.Height / (double)global::Cam.Capture.StandardHeight) * 7.00);
+                    int pos = midY - Jump;
+                    while (pos > 0)
+                    {
+                        if (cnt == 5)
+                        {
+                            e.Graphics.DrawLine(this.crossPen, psHTlow, pos, psHThig, pos);
+                            cnt = 0;
+                        }
+                        else
+                        {
+                            e.Graphics.DrawLine(this.crossPen, psSTlow, pos, psSThig, pos);
+                            cnt++;
+                        }
+                        pos -= Jump;
+                    }
+                    pos = midY + Jump;
                     cnt = 0;
-                }
-                else
-                {
-                    e.Graphics.DrawLine(this.crossPen, psSTlow, pos, psSThig, pos);
-                    cnt++;
-                }
-                pos -= Jump;
-            }
-            pos = midY + Jump;
-            cnt = 0;
-            while (pos < this.Height)
-            {
-                if (cnt == 5)
-                {
-                    e.Graphics.DrawLine(this.crossPen, psHTlow, pos, psHThig, pos);
+                    while (pos < this.Height)
+                    {
+                        if (cnt == 5)
+                        {
+                            e.Graphics.DrawLine(this.crossPen, psHTlow, pos, psHThig, pos);
+                            cnt = 0;
+                        }
+                        else
+                        {
+                            e.Graphics.DrawLine(this.crossPen, psSTlow, pos, psSThig, pos);
+                            cnt++;
+                        }
+                        pos += Jump;
+                    }
+                    psSTlow = midY - 5;
+                    psSThig = midY + 5;
+                    psHTlow = midY - 10;
+                    psHThig = midY + 10;
+                    Jump = (int)global::System.Math.Floor(((double)this.Width / (double)global::Cam.Capture.StandardWidth) * 7.00);
+                    pos = midX - Jump;
                     cnt = 0;
-                }
-                else
-                {
-                    e.Graphics.DrawLine(this.crossPen, psSTlow, pos, psSThig, pos);
-                    cnt++;
-                }
-                pos += Jump;
-            }
-            psSTlow = midY - 5;
-            psSThig = midY + 5;
-            psHTlow = midY - 10;
-            psHThig = midY + 10;
-            Jump = (int)global::System.Math.Floor(((double)this.Width / (double)global::Cam.Capture.StandardWidth) * 7.00);
-            pos = midX - Jump;
-            cnt = 0;
-            while (pos > 0)
-            {
-                if (cnt == 5)
-                {
-                    e.Graphics.DrawLine(this.crossPen, pos, psHTlow, pos, psHThig);
+                    while (pos > 0)
+                    {
+                        if (cnt == 5)
+                        {
+                            e.Graphics.DrawLine(this.crossPen, pos, psHTlow, pos, psHThig);
+                            cnt = 0;
+                        }
+                        else
+                        {
+                            e.Graphics.DrawLine(this.crossPen, pos, psSTlow, pos, psSThig);
+                            cnt++;
+                        }
+                        pos -= Jump;
+                    }
+                    pos = midX + Jump;
                     cnt = 0;
-                }
-                else
-                {
-                    e.Graphics.DrawLine(this.crossPen, pos, psSTlow, pos, psSThig);
-                    cnt++;
-                }
-                pos -= Jump;
+                    while (pos < this.Width)
+                    {
+                        if (cnt == 5)
+                        {
+                            e.Graphics.DrawLine(this.crossPen, pos, psHTlow, pos, psHThig);
+                            cnt = 0;
+                        }
+                        else
+                        {
+                            e.Graphics.DrawLine(this.crossPen, pos, psSTlow, pos, psSThig);
+                            cnt++;
+                        }
+                        pos += Jump;
+                    }
+                    e.Graphics.DrawLine(this.crossPen, midX, 0, midX, this.Height);
+                    e.Graphics.DrawLine(this.crossPen, 0, midY, this.Width, midY);
+                } catch { /* NOTHING */ }
+                this.canCapture = true;
             }
-            pos = midX + Jump;
-            cnt = 0;
-            while (pos < this.Width)
-            {
-                if (cnt == 5)
-                {
-                    e.Graphics.DrawLine(this.crossPen, pos, psHTlow, pos, psHThig);
-                    cnt = 0;
-                }
-                else
-                {
-                    e.Graphics.DrawLine(this.crossPen, pos, psSTlow, pos, psSThig);
-                    cnt++;
-                }
-                pos += Jump;
-            }
-            e.Graphics.DrawLine(this.crossPen, midX, 0, midX, this.Height);
-            e.Graphics.DrawLine(this.crossPen, 0, midY, this.Width, midY);
             base.OnPaint(e);
         }
 #if HISTOGRAM //https://csharpvault.com/image-histogram-processing/
@@ -491,7 +498,7 @@ namespace Cam //Documentation: https://docs.microsoft.com/pt-br/windows/desktop/
             return nImage;
         }
 #if !CLIPBOARD
-        private byte[] buff = new byte[] { 0 };
+        private static byte[] buff = new byte[] { 0 };
         private bool canCapture = false;
 
         private global::System.IntPtr capVideoStreamCallback(global::System.UIntPtr hWnd, ref global::Cam.Capture.VIDEOHDR lpVHdr)
@@ -499,11 +506,16 @@ namespace Cam //Documentation: https://docs.microsoft.com/pt-br/windows/desktop/
             if (this.canCapture)
             {
                 this.canCapture = false;
+                if (this.tempImg != null)
+                {
+                    this.tempImg.Dispose();
+                    this.tempImg = null;
+                }
                 byte did = 0;
                 try
                 {
-                    if (this.buff == null || this.buff.Length != lpVHdr.dwBufferLength) { this.buff = new byte[lpVHdr.dwBufferLength]; }
-                    global::System.Runtime.InteropServices.Marshal.Copy(lpVHdr.lpData, this.buff, 0, (int)lpVHdr.dwBufferLength);
+                    if (global::Cam.Capture.buff == null || global::Cam.Capture.buff.Length != lpVHdr.dwBufferLength) { global::Cam.Capture.buff = new byte[lpVHdr.dwBufferLength]; }
+                    global::System.Runtime.InteropServices.Marshal.Copy(lpVHdr.lpData, global::Cam.Capture.buff, 0, (int)lpVHdr.dwBufferLength);
                     did = 1;
 #if USEMEMSTREAM
                     global::System.Drawing.Bitmap bmp = null;
@@ -513,7 +525,7 @@ namespace Cam //Documentation: https://docs.microsoft.com/pt-br/windows/desktop/
                     global::System.Drawing.Bitmap bmp = new global::System.Drawing.Bitmap(this.m_Width, this.m_Height, this.setBitCount);
                     did = 2;
                     global::System.Drawing.Imaging.BitmapData bmpData = bmp.LockBits(new global::System.Drawing.Rectangle(0, 0, bmp.Width, bmp.Height), global::System.Drawing.Imaging.ImageLockMode.WriteOnly, bmp.PixelFormat);
-                    global::System.Runtime.InteropServices.Marshal.Copy(this.buff, 0, bmpData.Scan0, this.buff.Length);
+                    global::System.Runtime.InteropServices.Marshal.Copy(global::Cam.Capture.buff, 0, bmpData.Scan0, global::Cam.Capture.buff.Length);
                     did = 3;
 #endif
 #if !USEMEMSTREAM
@@ -521,11 +533,12 @@ namespace Cam //Documentation: https://docs.microsoft.com/pt-br/windows/desktop/
                     bmpData = null;
 #endif
                     bmp.RotateFlip(global::System.Drawing.RotateFlipType.Rotate180FlipX);
-                    this.tempImg = global::Cam.Capture.ConvertBlackAndWhite(bmp);
+                    this.tempImg = (this.setBitCount == global::System.Drawing.Imaging.PixelFormat.Format8bppIndexed ? bmp : global::Cam.Capture.ConvertBlackAndWhite(bmp));
                     did = 5;
                     bmp = null;
                     this.bCapturing = false;
                 } catch (global::System.Exception e) { global::System.Windows.Forms.MessageBox.Show("Erro ao Converter o Bitmap. (D.I.D.C. " + did.ToString() + ")" + global::System.Environment.NewLine + e.Message); }
+                this.canCapture = true;
             }
             return System.IntPtr.Zero;
         }
@@ -542,7 +555,9 @@ namespace Cam //Documentation: https://docs.microsoft.com/pt-br/windows/desktop/
                 this.tempImg = (global::System.Drawing.Bitmap)this.tempObj.GetData(global::System.Windows.Forms.DataFormats.Bitmap);
 #else
                 this.bCapturing = true;
-                this.canCapture = true;
+#if !CLIPBOARD
+                global::Cam.Capture.SendMessage(this.mCapHwnd, global::Cam.Capture.WM_CAP_SET_CALLBACK_FRAME, 0, this.capVideoStreamCallback);
+#endif
                 global::Cam.Capture.SendMessage(this.mCapHwnd, global::Cam.Capture.WM_CAP_GRAB_FRAME, 0, 0);
                 while (this.bCapturing) { /* NOTHING */ }
 #endif
@@ -566,6 +581,7 @@ namespace Cam //Documentation: https://docs.microsoft.com/pt-br/windows/desktop/
 
         public bool Pause()
         {
+            this.canCapture = false;
             if (!this.bStopped)
             {
                 this.bStopped = true;
@@ -576,7 +592,7 @@ namespace Cam //Documentation: https://docs.microsoft.com/pt-br/windows/desktop/
                 }
                 this.Disconnect();
 #if !CLIPBOARD
-                this.buff = null;
+                global::Cam.Capture.buff = null;
 #endif
                 if (this.OnStop != null) { this.OnStop(this, global::System.EventArgs.Empty); }
                 return true;
@@ -655,27 +671,30 @@ namespace Cam //Documentation: https://docs.microsoft.com/pt-br/windows/desktop/
                         bInfo.bmiHeader.biSizeImage = (uint)(bInfo.bmiHeader.biWidth * bInfo.bmiHeader.biHeight * (int)bInfo.bmiHeader.biBitCount / 8);
                         if (global::Cam.Capture.SendMessage(this.mCapHwnd, global::Cam.Capture.WM_CAP_SET_VIDEOFORMAT, global::System.Runtime.InteropServices.Marshal.SizeOf(bInfo), ref bInfo) > 0)
                         {
-                            this.setBitCount = global::System.Drawing.Imaging.PixelFormat.Format16bppRgb555;
-                            tech.Append(":reset=true;16bpp555");
-                        }
-                        else
+                            srcBitCount = bInfo.bmiHeader.biBitCount;
+                            tech.Append(":reset=true;");
+                        } else { tech.Append(":reset=false;"); }
+                        switch (srcBitCount)
                         {
-                            switch (srcBitCount)
-                            {
-                                case 8: this.setBitCount = global::System.Drawing.Imaging.PixelFormat.Format8bppIndexed; break;
-                                case 16: this.setBitCount = global::System.Drawing.Imaging.PixelFormat.Format16bppRgb555; break;
-                                case 32: this.setBitCount = global::System.Drawing.Imaging.PixelFormat.Format32bppArgb; break;
-                                case 48: this.setBitCount = global::System.Drawing.Imaging.PixelFormat.Format48bppRgb; break;
-                                case 64: this.setBitCount = global::System.Drawing.Imaging.PixelFormat.Format64bppArgb; break;
-                                default: this.setBitCount = global::System.Drawing.Imaging.PixelFormat.Format24bppRgb; break;
-                            }
-                            tech.Append(":reset=false;(bitCount:" + srcBitCount.ToString() + ");" + this.setBitCount.ToString());
+                            case 8: this.setBitCount = global::System.Drawing.Imaging.PixelFormat.Format8bppIndexed; break;
+                            case 16: this.setBitCount = global::System.Drawing.Imaging.PixelFormat.Format16bppRgb555; break;
+                            case 32: this.setBitCount = global::System.Drawing.Imaging.PixelFormat.Format32bppArgb; break;
+                            case 48: this.setBitCount = global::System.Drawing.Imaging.PixelFormat.Format48bppRgb; break;
+                            case 64: this.setBitCount = global::System.Drawing.Imaging.PixelFormat.Format64bppArgb; break;
+                            default: this.setBitCount = global::System.Drawing.Imaging.PixelFormat.Format24bppRgb; break;
                         }
+                        tech.Append("(bitCount:" + srcBitCount.ToString() + ");" + this.setBitCount.ToString());
                         did = 4;
+                        this.WriteDID(tech, did);
+                        global::Cam.Capture.SendMessage(this.mCapHwnd, global::Cam.Capture.WM_CAP_SET_PREVIEW, 0, 0);
+                        this.canCapture = true;
                     }
-                    if (this.DebugStart) { this.WriteDID(tech, did); }
+                    else
+                    {
+                        this.WriteDID(tech, did);
+                        this.Stop();
+                    }
 #endif
-                    global::Cam.Capture.SendMessage(this.mCapHwnd, global::Cam.Capture.WM_CAP_SET_PREVIEW, 0, 0);
                     global::System.Windows.Forms.Application.DoEvents();
                 }
                 this.worker = new global::System.Windows.Forms.Timer(this.components);
@@ -711,8 +730,9 @@ namespace Cam //Documentation: https://docs.microsoft.com/pt-br/windows/desktop/
             this.BackColor = global::System.Drawing.SystemColors.ControlDark;
             this.components = new global::System.ComponentModel.Container();
             this.Name = "Capture";
-            this.Size = new global::System.Drawing.Size(342, 252);
+            this.Size = new global::System.Drawing.Size(global::Cam.Capture.StandardWidth, global::Cam.Capture.StandardHeight);
             this.InitPen();
+            global::Cam.Capture.InitAtt();
         }
 
         protected override void OnResize(global::System.EventArgs e)
@@ -742,7 +762,8 @@ namespace Cam //Documentation: https://docs.microsoft.com/pt-br/windows/desktop/
             this.SuspendLayout();
             this.Location = new global::System.Drawing.Point(0, 0);
             this.cap.OnTick -= this.cap_Tick;
-            this.ResumeLayout(true);
+            this.ResumeLayout();
+            this.PerformLayout();
         }
 
         private void cap_DoubleClick(object sender, global::System.EventArgs e)
@@ -811,7 +832,7 @@ namespace Cam //Documentation: https://docs.microsoft.com/pt-br/windows/desktop/
 
         public FormMain(string[] args) : base()
         {
-            this.TopMost = true;
+            //this.TopMost = true;
             this.wasMinimized = false;
 #if DEBUG
 #if CLIPBOARD
@@ -849,11 +870,6 @@ namespace Cam //Documentation: https://docs.microsoft.com/pt-br/windows/desktop/
                         if (arg > 0) { this.cap.CaptureWidth = arg; }
                         arg = int.Parse(args[2]);
                         if (arg > 0) { this.cap.CaptureHeight = arg; }
-                        if (args.Length > 3)
-                        {
-                            arg = int.Parse(args[3]);
-                            if (arg == 1) { this.cap.DebugStart = true; }
-                        }
                     }
 #if DEBUG
                     global::System.Windows.Forms.MessageBox.Show("Argumento FrameInterval:" + this.cap.FrameInterval.ToString());
